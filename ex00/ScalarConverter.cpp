@@ -1,41 +1,88 @@
-#include "SclarConvert.hpp"
-#include <ctype>
+#include "ScalarConverter.hpp"
+#include "Out.hpp"
 
 ScalarConverter::ScalarConverter() {}
 ScalarConverter::ScalarConverter(const ScalarConverter&src) {(void)src;}
 ScalarConverter::~ScalarConverter() {}
 ScalarConverter &ScalarConverter::operator=(const ScalarConverter&src) {(void)src; return *this;}
-static int isInt()
+
+static int	isInt(std::string& lit)
+{
+	int	i = 0;
+
+	if (lit[i] == '-' || lit[i] == '+')
+		i++;
+	while (lit[i] >= '0' && lit[i] <= '9' && i < 12)
+		i++;
+	if (lit[i])
+		return 0;
+	return 1;
+}
+
+static int      isFloat(std::string& lit)
+{
+        int     i = 0;
+	int	flag = 0;
+
+        if (lit[i] == '-' || lit[i] == '+')
+                i++;
+        while (lit[i] >= '0' && lit[i] <= '9')
+	{
+                i++;
+		if (lit[i] == '.') { 
+			i++; 
+			flag++;
+		}
+		if (flag == 2) {
+			return 0;
+		}
+	}
+	if (lit[i] != 'f' || lit[i+1])
+		return 0;
+        return 1;
+}
+
+static int      isDouble(std::string& lit)
+{
+        int     i = 0;
+        int     flag = 0;
+
+        if (lit[i] == '-' || lit[i] == '+')
+                i++;
+        while (lit[i] >= '0' && lit[i] <= '9')
+        {
+                i++;
+                if (lit[i] == '.') {
+                        i++;
+                        flag++;
+                }
+                if (flag == 2) {
+                        return 0;
+                }
+        }
+        if (lit[i])
+                return 0;
+        return 1;
+}
 
 static int	getType(std::string& lit)
 {
-	if (lit.find('.') == string::npos)
+	if (lit.find('.') == std::string::npos)
 	{
-		if (str == "nan" || str == "nanf" || str == "+inf" || str == "+inff" || str == "-inf" || str == "-inff")
-			return 4;
-		if (lit.lenth == 1 && !isdigit(lit[0]))
+		if (lit == "nan" || lit == "nanf" || lit == "+inf" || lit == "+inff" || lit == "-inf" || lit == "-inff")
+			return 3;
+		if (lit.length() == 1 && isalpha(lit[0]))
 			return 0;
 		if (isInt(lit))
 			return 1;
 	}
-	if (lif.find('.') != string::npos)
-	{
-		if (isFloat(lif))
+	if (lit.find('.') != std::string::npos && (isDouble(lit) || isFloat(lit)))
 			return 2;
-		if (isDouble(lif))
-			return 3;
-	}
-	return 2319;
+	return -1;
 
 }
-static void charOut(std::string& lit) {std::cout << "Char input" <<std::endl;}
-static void intOut(std::string& lit) {std::cout << "Int input" <<std::endl;}
-static void floatOut(std::string& lit) {std::cout << "Float input" << std::endl;}
-static void doubleOut(std::string& lit) {std::cout << "Double input" << std::endl;}
-static void specialOut(std::string& lit) {std::cout << "Special input" << std::endl;}
-static void errOut() {std::cout << "ERROR input" << std::endl;}
 
-static void	ScalarConvert::convert(std::string& lit)
+void	ScalarConverter::convert(std::string& lit)
 {
 	int	type = getType(lit);
 	if (type == 0)
@@ -45,8 +92,6 @@ static void	ScalarConvert::convert(std::string& lit)
 	else if (type == 2)
 		floatOut(lit);
 	else if (type == 3)
-		doubleOut(lit);
-	else if (type == 4)
 		specialOut(lit);
 	else
 		errOut();
